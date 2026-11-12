@@ -1,0 +1,33 @@
+<div class="shell">
+  <aside class="sidebar">
+    <a class="brand" routerLink="/orders">
+      <span class="brand-mark">O</span>
+      <span><strong>Orderflow</strong><small>INTAKE & TRACKING</small></span>
+    </a>
+
+    <div class="nav-label">WORKSPACE</div>
+    <nav>
+      <a routerLink="/orders" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <span class="nav-icon">▦</span> All orders
+      </a>
+      <a routerLink="/orders/new" routerLinkActive="active">
+        <span class="nav-icon">＋</span> Create order
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="side-avatar">OM</div>
+      <div><strong>Order Manager</strong><small>Operations</small></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="crumb">Workspace <span>/</span> Order management</div>
+      <div class="top-right"><span class="online-dot"></span> API workspace</div>
+    </header>
+    <section class="page">
+      <router-outlet />
+    </section>
+  </main>
+</div>

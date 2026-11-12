@@ -1,0 +1,36 @@
+<div class="back-row"><a routerLink="/orders">← Back to orders</a><span>/</span> Order details</div>
+@if (loading()) {
+  <div class="loading-state">Loading order details...</div>
+} @else if (error()) {
+  <div class="error-panel"><strong>Unable to load order</strong><p>{{ error() }}</p><a routerLink="/orders">Return to orders</a></div>
+} @else if (order(); as current) {
+  <div class="page-heading">
+    <div><div class="eyebrow">ORDER DETAILS</div><h1>{{ current.externalReference }}</h1><p class="subheading">Created {{ current.createdAtUtc | date:'dd MMMM yyyy, HH:mm' }}</p></div>
+    <app-status-pill [status]="current.status" />
+  </div>
+
+  <div class="details-grid">
+    <section class="panel main-panel">
+      <div class="panel-heading"><div><h2>Order items</h2><p>{{ current.lines.length }} line item{{ current.lines.length === 1 ? '' : 's' }}</p></div></div>
+      <div class="table-wrap"><table><thead><tr><th>PRODUCT</th><th>QUANTITY</th><th>UNIT PRICE</th><th>LINE TOTAL</th></tr></thead>
+        <tbody>@for (line of current.lines; track line.id) {
+          <tr><td class="product-name">{{ line.productName }}</td><td>{{ line.quantity }}</td><td>{{ line.unitPrice | currency:'ZAR':'symbol-narrow':'1.2-2' }}</td><td class="money">{{ line.lineTotal | currency:'ZAR':'symbol-narrow':'1.2-2' }}</td></tr>
+        }</tbody>
+      </table></div>
+      <div class="total-row"><span>Order total</span><strong>{{ current.total | currency:'ZAR':'symbol-narrow':'1.2-2' }}</strong></div>
+    </section>
+
+    <aside class="side-column">
+      <section class="panel info-panel"><h2>Customer</h2><div class="customer-avatar">{{ current.customerName.slice(0, 1).toUpperCase() }}</div><strong class="customer-name">{{ current.customerName }}</strong><div class="info-label">EXTERNAL REFERENCE</div><div class="info-value">{{ current.externalReference }}</div><div class="info-label">ORDER ID</div><div class="info-value id-value">{{ current.id }}</div><div class="info-label">CREATED</div><div class="info-value">{{ current.createdAtUtc | date:'dd MMM yyyy, HH:mm' }}</div></section>
+      <section class="panel status-panel"><h2>Update status</h2><p>Choose an allowed next status for this order.</p>
+        @if (availableTransitions().length) {
+          <div class="status-actions">@for (status of availableTransitions(); track status) {
+            <button type="button" [class.danger]="status === 'Cancelled'" (click)="changeStatus(status)" [disabled]="updating()">{{ updating() ? 'Updating...' : statusLabel(status) }}</button>
+          }</div>
+        } @else { <div class="terminal-note">This order is in a final status. No further changes are available.</div> }
+        @if (updateError()) { <div class="inline-error">{{ updateError() }}</div> }
+        @if (updateSuccess()) { <div class="inline-success">{{ updateSuccess() }}</div> }
+      </section>
+    </aside>
+  </div>
+}

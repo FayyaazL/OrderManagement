@@ -1,0 +1,59 @@
+<div class="page-heading">
+  <div>
+    <div class="eyebrow">OVERVIEW</div>
+    <h1>Orders</h1>
+    <p class="subheading">Manage incoming orders and track their progress.</p>
+  </div>
+  <a class="primary-button" routerLink="/orders/new"><span>＋</span> New order</a>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card"><div class="stat-label">TOTAL ORDERS</div><div class="stat-value">{{ orders().length }}</div><div class="stat-note">All recorded orders</div></div>
+  <div class="stat-card"><div class="stat-label">PENDING</div><div class="stat-value">{{ count('Pending') }}</div><div class="stat-note"><span class="dot amber"></span> Awaiting confirmation</div></div>
+  <div class="stat-card"><div class="stat-label">CONFIRMED</div><div class="stat-value">{{ count('Confirmed') }}</div><div class="stat-note"><span class="dot blue"></span> In progress</div></div>
+  <div class="stat-card"><div class="stat-label">FULFILLED</div><div class="stat-value">{{ count('Fulfilled') }}</div><div class="stat-note"><span class="dot green"></span> Successfully completed</div></div>
+</div>
+
+<section class="panel">
+  <div class="panel-heading">
+    <div><h2>Order register</h2><p>Latest orders appear first.</p></div>
+    <button class="icon-button" type="button" (click)="loadOrders()" aria-label="Refresh orders">↻</button>
+  </div>
+
+  <div class="toolbar">
+    <label class="search-box"><span>⌕</span><input #searchInput type="search" placeholder="Search customer or reference..." (input)="setSearch(searchInput.value)"></label>
+    <select aria-label="Filter by status" [value]="statusFilter()" (change)="setStatus($any($event.target).value)">
+      @for (status of statuses; track status) { <option [value]="status">{{ status === 'All' ? 'All statuses' : status }}</option> }
+    </select>
+  </div>
+
+  @if (loading()) {
+    <div class="state"><div class="spinner"></div><p>Loading orders...</p></div>
+  } @else if (error()) {
+    <div class="state error-state"><strong>We couldn't load your orders</strong><p>{{ error() }}</p><button class="secondary-button" (click)="loadOrders()">Try again</button></div>
+  } @else if (filteredOrders().length === 0) {
+    <div class="state empty-state"><div class="empty-icon">▤</div><strong>{{ orders().length ? 'No matching orders' : 'No orders yet' }}</strong><p>{{ orders().length ? 'Try changing your search or filter.' : 'Create your first order to get started.' }}</p>
+      @if (!orders().length) { <a class="primary-button" routerLink="/orders/new">Create an order</a> }
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>ORDER</th><th>CUSTOMER</th><th>DATE CREATED</th><th>ITEMS</th><th>TOTAL</th><th>STATUS</th><th></th></tr></thead>
+        <tbody>
+          @for (order of filteredOrders(); track order.id) {
+            <tr>
+              <td><a class="order-ref" [routerLink]="['/orders', order.id]">{{ order.externalReference }}</a><small class="id-short">{{ order.id.slice(0, 8) }}</small></td>
+              <td class="customer">{{ order.customerName }}</td>
+              <td>{{ order.createdAtUtc | date:'dd MMM yyyy, HH:mm' }}</td>
+              <td>{{ order.lines.length }} item{{ order.lines.length === 1 ? '' : 's' }}</td>
+              <td class="money">{{ order.total | currency:'ZAR':'symbol-narrow':'1.2-2' }}</td>
+              <td><app-status-pill [status]="order.status" /></td>
+              <td><a class="view-link" [routerLink]="['/orders', order.id]">View →</a></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="table-footer">Showing {{ filteredOrders().length }} of {{ orders().length }} orders</div>
+  }
+</section>

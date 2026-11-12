@@ -1,0 +1,46 @@
+<div class="back-row"><a routerLink="/orders">← Back to orders</a><span>/</span> New order</div>
+<div class="page-heading"><div><div class="eyebrow">ORDER INTAKE</div><h1>Create order</h1><p class="subheading">Capture the customer details and items for this order.</p></div></div>
+
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <section class="form-panel">
+    <div class="section-title"><span class="section-number">01</span><div><h2>Customer information</h2><p>Identify the customer and their external order reference.</p></div></div>
+    <div class="field-grid">
+      <label class="field"><span>Customer name <b>*</b></span><input formControlName="customerName" placeholder="e.g. ABC Trading" />
+        @if (form.controls.customerName.touched && form.controls.customerName.invalid) { <small class="field-error">Customer name is required (maximum 200 characters).</small> }
+      </label>
+      <label class="field"><span>External reference <b>*</b></span><input formControlName="externalReference" placeholder="e.g. EXT-1001" />
+        @if (form.controls.externalReference.touched && form.controls.externalReference.invalid) { <small class="field-error">External reference is required (maximum 100 characters).</small> }
+        <small class="hint">Must be unique. Used to prevent duplicate submissions.</small>
+      </label>
+    </div>
+  </section>
+
+  <section class="form-panel items-panel">
+    <div class="section-title"><span class="section-number">02</span><div><h2>Order items</h2><p>Add one or more products. The server calculates the final total.</p></div></div>
+    <div formArrayName="lines">
+      @for (line of lines.controls; track $index; let i = $index) {
+        <div class="line-row" [formGroupName]="i">
+          <div class="line-index">{{ (i + 1).toString().padStart(2, '0') }}</div>
+          <label class="field product-field"><span>Product name <b>*</b></span><input formControlName="productName" placeholder="Product or service" />
+            @if (line.get('productName')?.touched && line.get('productName')?.invalid) { <small class="field-error">Product name is required.</small> }
+          </label>
+          <label class="field quantity-field"><span>Quantity <b>*</b></span><input type="number" min="1" step="1" formControlName="quantity" />
+            @if (line.get('quantity')?.touched && line.get('quantity')?.invalid) { <small class="field-error">Enter a positive whole number.</small> }
+          </label>
+          <label class="field price-field"><span>Unit price (ZAR) <b>*</b></span><input type="number" min="0" step="0.01" formControlName="unitPrice" />
+            @if (line.get('unitPrice')?.touched && line.get('unitPrice')?.invalid) { <small class="field-error">Price cannot be negative.</small> }
+          </label>
+          <button type="button" class="remove-button" (click)="removeLine(i)" [disabled]="lines.length === 1" aria-label="Remove line">×</button>
+        </div>
+      }
+    </div>
+    <button type="button" class="add-line" (click)="addLine()">＋ Add another item</button>
+    <div class="estimate"><div><span>Estimated total</span><small>For guidance only; the API calculates the saved order total.</small></div><strong>{{ estimatedTotal | number:'1.2-2' }}</strong></div>
+  </section>
+
+  @if (error()) {
+    <div class="alert-error"><strong>Order could not be created</strong><span>{{ error() }}</span></div>
+  }
+
+  <div class="form-actions"><a class="cancel-button" routerLink="/orders">Cancel</a><button class="submit-button" type="submit" [disabled]="submitting()">{{ submitting() ? 'Creating order...' : 'Create order →' }}</button></div>
+</form>
