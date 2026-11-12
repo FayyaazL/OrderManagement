@@ -23,7 +23,7 @@ public class OrderServiceTests
     public async Task CreateAsync_ShouldCreateAndPersistOrder()
     {
         var request = new CreateOrderRequest(
-            "Contoso",
+            "TestCustomer",
             "ORD-1001",
             [
                 new OrderLineRequest("Keyboard", 2, 49.99m)
@@ -37,7 +37,7 @@ public class OrderServiceTests
 
         var result = await _service.CreateAsync(request);
 
-        result.CustomerName.Should().Be("Contoso");
+        result.CustomerName.Should().Be("TestCustomer");
         result.ExternalReference.Should().Be("ORD-1001");
         result.Status.Should().Be(OrderStatus.Pending);
         result.Lines.Should().ContainSingle();
@@ -45,7 +45,7 @@ public class OrderServiceTests
 
         await _repository.Received(1).AddAsync(
             Arg.Is<Order>(order =>
-                order.CustomerName == "Contoso" &&
+                order.CustomerName == "TestCustomer" &&
                 order.ExternalReference == "ORD-1001" &&
                 order.Status == OrderStatus.Pending &&
                 order.Total == 99.98m),
@@ -64,7 +64,7 @@ public class OrderServiceTests
             [new OrderLine("Keyboard", 1, 10m)]);
 
         var request = new CreateOrderRequest(
-            "Contoso",
+            "TestCustomer",
             "ORD-1001",
             [
                 new OrderLineRequest("Mouse", 1, 20m)
@@ -94,7 +94,7 @@ public class OrderServiceTests
     public async Task GetByIdAsync_ShouldReturnMappedOrder()
     {
         var order = new Order(
-            "Contoso",
+            "TestCustomer",
             "ORD-1001",
             [new OrderLine("Keyboard", 2, 49.99m)]);
 
@@ -105,7 +105,7 @@ public class OrderServiceTests
         var result = await _service.GetByIdAsync(order.Id);
 
         result.Id.Should().Be(order.Id);
-        result.CustomerName.Should().Be("Contoso");
+        result.CustomerName.Should().Be("TestCustomer");
         result.Total.Should().Be(99.98m);
         result.Lines.Should().ContainSingle();
     }
@@ -130,7 +130,7 @@ public class OrderServiceTests
     public async Task UpdateStatusAsync_ShouldApplyValidStatusTransition()
     {
         var order = new Order(
-            "Contoso",
+            "TestCustomer",
             "ORD-1001",
             [new OrderLine("Keyboard", 1, 10m)]);
 
@@ -153,7 +153,7 @@ public class OrderServiceTests
     public async Task UpdateStatusAsync_ShouldRejectInvalidStatusTransition()
     {
         var order = new Order(
-            "Contoso",
+            "TestCustomer",
             "ORD-1001",
             [new OrderLine("Keyboard", 1, 10m)]);
 
